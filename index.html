@@ -20,7 +20,8 @@
 
     <!-- The core Firebase JS SDK is always required and must be listed first -->
     <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.19.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-firestore.js"></script>
 
 
     <!-- TODO: Add SDKs for Firebase products that you want to use
@@ -76,17 +77,10 @@
                     <div id="collapseBootstrap" class="collapse" aria-labelledby="headingBootstrap"
                         data-parent="#accordionSidebar">
                         <div class="bg-white py-2 collapse-inner rounded">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="Samsung"><label
-                                    class="custom-control-label" for="Samsung">Samsung</label>
-                            </div>
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="Nokia"><label
-                                    class="custom-control-label" for="Nokia">Nokia</label>
-                            </div>
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="Huawei"><label
-                                    class="custom-control-label" for="Huawei">Huawei</label>
+                            <div class="custom-control custom-checkbox" v-for="(marca) in marcas">
+                                <input type="checkbox" class="custom-control-input" :id="marca.nombre"
+                                    v-model="marca.checked"><label class="custom-control-label" :for="marca.nombre"
+                                    v-bind:value="marca.id">{{marca.nombre}}</label>
                             </div>
                         </div>
                     </div>
@@ -291,8 +285,6 @@
                                 </div>
                             </div>
                             <!--Row-->
-
-
                         </div>
                         <!---Container Fluid-->
                     </div>
@@ -399,9 +391,43 @@
                             </button>
                         </div>
                         <div class="modal-body">
+                            <!-- pasos horizontales de modal agregar nuevo anuncio -->
+                            <div class="md-stepper-horizontal orange">
+                                <div class="md-step" v-bind:class="{active:pasoModal===1}" @click="pasoModal=1">
+                                    <div class="md-step-circle"><span>1</span></div>
+                                    <div class="md-step-title">Vendedor</div>
+                                    <div class="md-step-bar-left"></div>
+                                    <div class="md-step-bar-right"></div>
+                                </div>
+                                <div class="md-step" v-bind:class="{active:pasoModal===2}" @click="pasoModal=2">
+                                    <div class="md-step-circle"><span>2</span></div>
+                                    <div class="md-step-title">Celular</div>
+                                    <div class="md-step-bar-left"></div>
+                                    <div class="md-step-bar-right"></div>
+                                </div>
+                            </div>
+                            <!-- fin de pasos horizontales de modal agregar nuevo anuncio -->
+                            <!-- inicio de info del vendedor -->
+                            <div v-bind:class="{hide:pasoModal===2}">
+                                <div class="form-group">
+                                    <label for="name">Nombre:</label>
+                                    <input type="text" class="form-control" id="name" v-model="anuncio.nombreVendedor">
+                                </div>
+                                <div class="form-group">
+                                    <label for="tel">Teléfono:</label>
+                                    <input type="text" class="form-control" id="tel" v-model="anuncio.telVendedor">
+                                </div>
+                            </div>
+                            <!-- fin de info del vendedor -->
 
-                            <!-- Descreipción start-->
-                            <form>
+
+
+                            <!-- Descripción start-->
+                            <form v-bind:class="{hide:pasoModal===1}">
+                                <div class="form-group">
+                                    <label for="tittle">Título del anuncio:</label>
+                                    <input type="text" class="form-control" id="tittle" v-model="anuncio.titulo">
+                                </div>
                                 Marca:
                                 <div class="plus-sign" data-toggle="modal" data-target="#addMarca">+</div>
                                 <div class="trash plus-sign" data-toggle="modal" data-target="#deleteMarca"
@@ -422,76 +448,88 @@
                                 <div class="form-group">
                                     <label>Estado:</label>
                                     <div class="custom-control custom-radio inline-display">
-                                        <input type="radio" id="customRadio3" name="customRadio"
-                                            class="custom-control-input">
+                                        <input type="radio" id="customRadio3" name="customRadio" value="Nuevo"
+                                            class="custom-control-input" v-model="anuncio.estado">
                                         <label class="custom-control-label" for="customRadio3">Nuevo</label>
                                     </div>
                                     <div class="custom-control custom-radio inline-display">
                                         <input type="radio" id="customRadio4" name="customRadio"
-                                            class="custom-control-input">
+                                            class="custom-control-input" v-model="anuncio.estado" value="Usado">
                                         <label class="custom-control-label" for="customRadio4">Usado</label>
                                     </div>
                                 </div>
                                 <div style="display: flex;justify-content: space-between;">
                                     <div class="form-group inline-display">
                                         <label for="ram">RAM:</label>
-                                        <input type="text" class="ram-rom" id="ram"
-                                            aria-describedby="ram" placeholder="en GB">
+                                        <input type="number" class="ram-rom" id="ram" aria-describedby="ram"
+                                            placeholder="en GB" v-model="anuncio.ram" min="0">
                                     </div>
                                     <div class="form-group inline-display">
                                         <label for="rom">ROM:</label>
-                                        <input type="text" class="ram-rom" id="rom"
-                                            aria-describedby="rom" placeholder="en GB">
+                                        <input type="number" class="ram-rom" id="rom" aria-describedby="rom"
+                                            placeholder="en GB" v-model="anuncio.rom" min="0">
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="sizeScreen">Tamaño de pantalla:</label>
-                                    <input type="number" class="form-control" id="sizeScreen" placeholder="En pulgadas" min="0" max="10">
+                                    <input type="number" class="form-control" id="sizeScreen" placeholder="En pulgadas"
+                                        min="0" max="10" v-model="anuncio.Screen_size">
                                 </div>
+                                Sistema Operativo:
+                                <select v-model="anuncio.sistema" class="form-control mb-3" id="so">
+                                    <option v-for="(sis) in so" v-bind:value="sis">{{sis}}</option>
+                                </select>
                                 Compañia Celular:
-                                <select class="form-control mb-3" id="compania">
-                                    <option>Tigo</option>
-                                    <option>Claro</option>
-                                    <option>Movistar</option>
-                                    <option>Digicel</option>
-                                    <option>Extrangera</option>
-                                    <option>Liberado</option>
-                                    <option>Bloqueado</option>
+                                <select class="form-control mb-3" id="compania" v-model="anuncio.compania_tel">
+                                    <option value="Tigo">Tigo</option>
+                                    <option value="Claro">Claro</option>
+                                    <option value="Movistar">Movistar</option>
+                                    <option value="Digicel">Digicel</option>
+                                    <option value="Extrangera">Extrangera</option>
+                                    <option value="Liberado">Liberado</option>
+                                    <option value="Bloqueado">Bloqueado</option>
+                                    <option value="Otra">Otra</option>
                                 </select>
                                 <div class="form-group">
-                                    <label for="exampleInputEmail1">Descripción:</label>
-                                    <input type="email" class="form-control" id="exampleInputEmail1"
-                                        aria-describedby="emailHelp" placeholder="Información">
+                                    <label for="exampleFormControlTextarea1">Descripción</label>
+                                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="5"
+                                        v-model="anuncio.descripcion"></textarea>
                                 </div>
                                 <div class="form-group">
                                     <label for="exampleInputPassword1">Precio:</label>
-                                    <input type="text" class="form-control" id="exampleInputPassword1" placeholder="$USD">
+                                    <input type="number" class="form-control" id="exampleInputPassword1"
+                                        placeholder="$USD" v-model="anuncio.precio" min="0">
                                 </div>
                                 <div class="file-upload form-group">
                                     <button class="file-upload-btn" type="button"
                                         @click="$('.file-upload-input').trigger( 'click' )">Agregar Imagenes</button>
                                     <div class="image-upload-wrap" v-show="fotoFiles.length === 0">
-                                        <input class="file-upload-input" type='file' @change="readURL" multiple/>
+                                        <input class="file-upload-input" type='file' @change="readURL" multiple />
                                         <div class="drag-text">
                                             <h3>Arrastra las imagenes acá o selecciona "Agregar Imagenes"</h3>
                                         </div>
                                     </div>
-                                    <div class="file-upload-content" v-show="fotoFiles.length != 0" v-for="(imagen) in fotoTmp">
-                                        <img class="file-upload-image" :src="imagen.url"/>
+                                    <div class="file-upload-content" v-show="fotoFiles.length != 0"
+                                        v-for="(imagen) in fotoTmp">
+                                        <img class="file-upload-image" :src="imagen.url" />
                                         <div class="image-title-wrap">
-                                            <button type="button" @click="removeUpload(imagen)" class="remove-image">Quitar {{imagen===undefined?"Imagen Subida":imagen.name}}</button>
+                                            <button type="button" @click="removeUpload(imagen)"
+                                                class="remove-image">Quitar
+                                                {{imagen===undefined?"Imagen Subida":imagen.name}}</button>
                                         </div>
                                     </div>
                                 </div>
-
-
-
                             </form>
                             <!-- Descreipción end-->
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-outline-primary" data-dismiss="modal">Cerrar</button>
-                            <button type="button" class="btn btn-primary">Guardar</button>
+                            <button type="button" class="btn btn-outline-warning" v-bind:class="{hide : pasoModal=== 1}"
+                                @click="pasoModal--">Anterior</button>
+                            <button type="button" class="btn btn-primary" v-bind:class="{hide : pasoModal=== 2}"
+                                @click="pasoModal++">Siguiente</button>
+                            <button type="button" class="btn btn-primary"
+                                v-bind:class="{hide : pasoModal===1}" @click="agregarNuevoAnuncio()" data-dismiss="modal">Guardar</button>
                         </div>
                     </div>
                 </div>

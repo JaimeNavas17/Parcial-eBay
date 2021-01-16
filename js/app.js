@@ -1,4 +1,5 @@
 var db = firebase.firestore();
+var storageRef = firebase.storage().ref();
 
 const vueApp = new Vue({
     el: '#vue-container',
@@ -9,10 +10,12 @@ const vueApp = new Vue({
         // Mock de datos :B
         marcas: [{
             "id": 1,
-            "nombre": "Samsung"
+            "nombre": "Samsung",
+            "checked": false
         }, {
             "id": 2,
-            "nombre": "Huawey"
+            "nombre": "Huawey",
+            "checked": false
         }],
         modelos: [{
                 "id": 1,
@@ -41,7 +44,25 @@ const vueApp = new Vue({
         newModeloNom: "",
         fotoFiles: [],
         fotoTmp: [],
-
+        so: ["IOS", "Windows", "Android", "Blackberry", "Otro"],
+        anuncio: {
+            "compania_tel": "",
+            "Screen_size": 0,
+            "ram": 0,
+            "rom": 0,
+            "estado": "",
+            "descripcion": "",
+            "precio": 0,
+            "sistema": "",
+            "nombreVendedor": "",
+            "id_modelo": "",
+            "titulo": "",
+            "telVendedor": "",
+            "fotos": [],
+            "fecha": ""
+        },
+        pasoModal: 1,
+        anuncios: []
     },
 
 
@@ -52,7 +73,8 @@ const vueApp = new Vue({
                 docs.forEach((docu) => {
                     this.marcas.push({
                         "id": docu.id,
-                        "nombre": docu.data().nombre
+                        "nombre": docu.data().nombre,
+                        "checked": false
                     });
                 });
             });
@@ -124,7 +146,7 @@ const vueApp = new Vue({
                     a.type != "image/png" &&
                     a.type != "image/gif"
                 ) {
-                    console.log("No se pudo subir el documento: ",a.name, "no tiene formato de imagen");
+                    console.log("No se pudo subir el documento: ", a.name, "no tiene formato de imagen");
                 } else {
                     this.fotoFiles.push(a);
                     var fileObject = a;
@@ -141,9 +163,6 @@ const vueApp = new Vue({
         },
 
         removeUpload(img) {
-            // $(".file-upload-input").replaceWith($(".file-upload-input").clone());
-            // $(".file-upload-content").hide();
-            // $(".image-upload-wrap").show();
             let index = this.fotoTmp.indexOf(img);
             if (index > -1) {
                 this.fotoTmp.splice(index, 1);
@@ -151,17 +170,64 @@ const vueApp = new Vue({
             }
         },
 
-        async imagenUrl(fileObject) {
-            console.log(fileObject)
-            var fileReader = new FileReader();
-            fileReader.readAsDataURL(fileObject);
-            fileReader.onload = await
-            function () {
-                console.log(fileReader.result)
+        async uploadImages(file, cb) {
+            const fileRef = storageRef.child(file.name);
+            await fileRef.put(file);
+            this.anuncio.fotos.push(await fileRef.getDownloadURL());
+            console.log("se subio la img: ", file.name)
+            cb();
+        },
 
-                return fileReader.result;
+        fetchAnuncios() {
+            this.anuncios = [];
+            this.anuncio = {
+                "compania_tel": "",
+                "Screen_size": 0,
+                "ram": 0,
+                "rom": 0,
+                "estado": "",
+                "descripcion": "",
+                "precio": 0,
+                "sistema": "",
+                "nombreVendedor": "",
+                "id_modelo": "",
+                "titulo": "",
+                "telVendedor": "",
+                "fotos": [],
+                "fecha": ""
             };
-        }
+            db.collection("anuncio").get().then((docs) => {
+                docs.forEach((docu) => {
+                    this.anuncios.push(
+                        // "id": docu.id,
+                        docu.data(),
+                    );
+                });
+            });
+        },
+
+        agregarNuevoAnuncio() {
+            //hacer todo procedimiento interno para quefuncione el objeto JSON
+            this.anuncio.fecha = getFecha();
+            this.anuncio.id_modelo = this.modeloSel.id;
+            
+            let requests = this.fotoFiles.map((file) => {
+                return new Promise((resolve) => {
+                    this.uploadImages(file, resolve);
+                });
+            });
+            
+            Promise.all(requests).then(() => {
+                console.log('finalizó la subida')
+                console.log(vueApp.anuncio);
+                db.collection("anuncio").add(vueApp.anuncio).then(function (docRef) {
+                    vueApp.fetchAnuncios();
+                    console.log("El documento se ha escrito y su id es: ", docRef.id);
+                }).catch(function (error) {
+                    console.error("Error al tratar de agregar el documento", error);
+                });
+            });
+        },
     },
 
     computed: {
@@ -169,52 +235,43 @@ const vueApp = new Vue({
     },
     mounted: function () {
         console.log("iniciado");
-
-        // this.fetchMarca();
-        // this.fetchModelo();
+        this.fetchAnuncios()
+        this.fetchMarca();
+        this.fetchModelo();
     },
 
 });
 
-//------------------------------------------
-// var input = document.querySelector("#file-input");
+/**
+ * Esta funcion es para obtener la fecha
+ */
+function getFecha() {
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0');
+    var yyyy = today.getFullYear();
+    today = mm + '/' + dd + '/' + yyyy;
+    return today;
+}
 
-// document.querySelector("button").addEventListener("click", function () {
-//   input.click();
-// });
 
-// input.addEventListener("change", preview);
 
-// function preview() {
-//   console.log(this.files,'\n',this.files[0]);
-//   Array.from(this.files).forEach((a) => {
-//       console.log(a);
-//     if (
-//       a.type != "image/jpeg" &&
-//       a.type != "image/png" &&
-//       a.type != "image/gif"
-//     ) {
-//       alert("No se pudo subir la imagen");
-//     } else {
-//       var fileObject = a;
-//       var fileReader = new FileReader();
-//       fileReader.readAsDataURL(fileObject);
-//       fileReader.onload = function () {
-//         var para = document.createElement("img");
-//         var result = fileReader.result;
-//         var img = document.querySelector("#preview");
-//         para.setAttribute("src", result);
-//         img.appendChild(para);
-//       };
-//     }
-//   });
+
+// // ---------------------------------------------------------------
+// function asyncFunction(item, cb) {
+//     setTimeout(() => {
+//         console.log('done with', item);
+//         cb();
+//     }, 100);
 // }
 
+// let requests = [1, 2, 3].map((item) => {
+//     return new Promise((resolve) => {
+//         asyncFunction(item, resolve);
+//     });
+// })
 
-// {
-/* <input type='file' id='file-input' hidden multiple>
-<div id='container'>
-  <button>Select an image</button>
-  <p id='preview'>Preview</p>
-</div> */
-// }
+// Promise.all(requests).then(() => console.log('done'));
+
+// // ---------------------------------------------------------------
+
