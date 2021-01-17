@@ -188,98 +188,39 @@
                                 </div>
                             </div>
 
-                            <!-- Earnings (Monthly) Card Example -->
-                            <div class="col-xl-3 col-md-6 mb-4">
+                            <!-- Anuncios listados -->
+                            <div class="col-xl-3 col-md-6 mb-4" v-for="(anuncio) in anuncios"
+                                style="padding-bottom: 0%;">
                                 <div class="card h-100" style="cursor: pointer;">
-                                    <div class="card-body">
-                                        <div class="row align-items-center">
-                                            <div class="col-auto">
-                                                <img src="img/840_560.jpg" class="card-img-top" alt="...">
+                                    <div class="card-body" style="display: flex;">
+                                        <div class="row align-items-center" style="width: 100%;">
+                                            <div class="col-auto anuncio-parent">
+                                                <img :src="anuncio.fotos[0]" class="card-img-top anuncios-img"
+                                                    :alt="anuncio.titulo">
                                             </div>
                                             <div class="col mr-2">
-                                                <div class="text-xs font-weight-bold text-uppercase mb-1">TELEFONO
-                                                    SAMSUNG
-                                                    S20 ULTRA</div>
-                                                <div class="h5 mb-0 font-weight-bold text-gray-800">$1,200</div>
+                                                <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                                    {{anuncio.titulo}}</div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800">${{anuncio.precio}}
+                                                </div>
                                                 <div class="mt-2 mb-0 text-muted text-xs">
-                                                    <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 128
-                                                        GB</span>
-                                                    <span>RAM 8 GB</span>
+                                                    <span class="text-success mr-2">RAM {{anuncio.ram}}</span>
+                                                    <span>ROM {{anuncio.ram}}</span>
                                                 </div>
                                             </div>
+
 
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <!-- Earnings (Annual) Card Example -->
-                            <div class="col-xl-3 col-md-6 mb-4">
-                                <div class="card h-100" style="cursor: pointer;">
-                                    <div class="card-body">
-                                        <div class="row align-items-center">
-                                            <div class="col-auto">
-                                                <img src="img/840x560.jpg" class="card-img-top" alt="...">
-                                            </div>
-                                            <div class="col mr-2">
-                                                <div class="text-xs font-weight-bold text-uppercase mb-1">TELEFONO
-                                                    IPHONE 11
-                                                    PRO MAX</div>
-                                                <div class="h5 mb-0 font-weight-bold text-gray-800">$2,500</div>
-                                                <div class="mt-2 mb-0 text-muted text-xs">
-                                                    <span class="text-success mr-2"><i class="fas fa-arrow-up"></i> 128
-                                                        GB</span>
-                                                    <span>RAM 6 GB</span>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- New User Card Example -->
-                            <div class="col-xl-3 col-md-6 mb-4">
-                                <div class="card h-100" style="cursor: pointer;">
-                                    <div class="card-body">
-                                        <div class="row align-items-center">
-                                            <div class="col-auto">
-                                                <img src="img/149828-phones-feature-huawei-p40-and-p40-pro-what-we-want-to-see-image1-mrcykafpzz.jpg"
-                                                    class="card-img-top" alt="...">
-                                            </div>
-                                            <div class="col mr-2">
-                                                <div class="text-xs font-weight-bold text-uppercase mb-1">TELEFONO
-                                                    HUAWEI
-                                                    P40 PRO</div>
-                                                <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">$1,650</div>
-                                                <div class="mt-2 mb-0 text-muted text-xs">
-                                                    <span class="text-success mr-2"><i class="fas fa-arrow-up"></i> 64
-                                                        GB</span>
-                                                    <span>RAM 6 GB</span>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Pending Requests Card Example -->
-                            <div class="col-xl-3 col-md-6 mb-4">
-                                <div class="card h-100" style="cursor: pointer;">
-                                    <div class="card-body">
-                                        <div class="row align-items-center">
-                                            <div class="col-auto">
-                                                <img src="img/telefono nokia.png" class="card-img-top" alt="...">
-                                            </div>
-                                            <div class="col mr-2">
-                                                <div class="text-xs font-weight-bold text-uppercase mb-1">TELEFONO NOKIA
-                                                    EDGE 2020</div>
-                                                <div class="h5 mb-0 font-weight-bold text-gray-800">$1,780</div>
-                                                <div class="mt-2 mb-0 text-muted text-xs">
-                                                    <span class="text-success mr-2"><i class="fas fa-arrow-up"></i> 128
-                                                        GB</span>
-                                                    <span>RAM 8 GB</span>
-                                                </div>
-                                            </div>
-
+                                    <div class="col mr-2 anuncio-sub">
+                                        <div class="text-xs font-weight-bold text-uppercase mb-1">Vendedor:
+                                            {{anuncio.nombreVendedor}}</div>
+                                        <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                            Publicado hace:
+                                            {{
+                                                diffDays(anuncio.fecha)
+                                            }} 
+                                            <!-- {{anuncio.fecha.substring(0,2)}}/{{anuncio.fecha.substring(3,5)}}/{{anuncio.fecha.substring(6)}}                                             -->
                                         </div>
                                     </div>
                                 </div>
@@ -528,8 +469,8 @@
                                 @click="pasoModal--">Anterior</button>
                             <button type="button" class="btn btn-primary" v-bind:class="{hide : pasoModal=== 2}"
                                 @click="pasoModal++">Siguiente</button>
-                            <button type="button" class="btn btn-primary"
-                                v-bind:class="{hide : pasoModal===1}" @click="agregarNuevoAnuncio()" data-dismiss="modal">Guardar</button>
+                            <button type="button" class="btn btn-primary" v-bind:class="{hide : pasoModal===1}"
+                                @click="agregarNuevoAnuncio()" data-dismiss="modal">Guardar</button>
                         </div>
                     </div>
                 </div>

@@ -210,17 +210,21 @@ const vueApp = new Vue({
             //hacer todo procedimiento interno para quefuncione el objeto JSON
             this.anuncio.fecha = getFecha();
             this.anuncio.id_modelo = this.modeloSel.id;
-            
+
             let requests = this.fotoFiles.map((file) => {
                 return new Promise((resolve) => {
                     this.uploadImages(file, resolve);
                 });
             });
-            
+
             Promise.all(requests).then(() => {
                 console.log('finalizó la subida')
-                console.log(vueApp.anuncio);
                 db.collection("anuncio").add(vueApp.anuncio).then(function (docRef) {
+                    vueApp.marcaSel = "";
+                    vueApp.modeloSel = "";
+                    vueApp.fotoFiles = [];
+                    vueApp.fotoTmp = [];
+                    vueApp.pasoModal = 1;
                     vueApp.fetchAnuncios();
                     console.log("El documento se ha escrito y su id es: ", docRef.id);
                 }).catch(function (error) {
@@ -254,24 +258,11 @@ function getFecha() {
     return today;
 }
 
-
-
-
-// // ---------------------------------------------------------------
-// function asyncFunction(item, cb) {
-//     setTimeout(() => {
-//         console.log('done with', item);
-//         cb();
-//     }, 100);
-// }
-
-// let requests = [1, 2, 3].map((item) => {
-//     return new Promise((resolve) => {
-//         asyncFunction(item, resolve);
-//     });
-// })
-
-// Promise.all(requests).then(() => console.log('done'));
-
-// // ---------------------------------------------------------------
-
+function diffDays(fecha) {
+    //    var fechaActual = getFecha(); Retorna NaN, super weird
+    var fechaActual = new Date().getTime();
+    var firstDate = new Date(fecha).getTime();
+    var diff = fechaActual - firstDate;
+    let total =Math.round((diff / (1000 * 60 * 60 * 24)));
+    return  total===1?`${total} día`:`${total} días`;
+}
