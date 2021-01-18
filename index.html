@@ -95,16 +95,29 @@
                         data-parent="#accordionSidebar">
                         <div class="bg-white py-2 collapse-inner rounded">
                             <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="Android"><label
-                                    class="custom-control-label" for="Android">Android</label>
+                                <input type="checkbox" class="custom-control-input" id="Android"
+                                @click="checkedOS($event.target,'Android')"><label class="custom-control-label"
+                                    for="Android">Android</label>
                             </div>
                             <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="IOS"><label
-                                    class="custom-control-label" for="IOS">IOS</label>
+                                <input type="checkbox" class="custom-control-input" id="IOS"
+                                @click="checkedOS($event.target,'IOS')"><label class="custom-control-label"
+                                    for="IOS">IOS</label>
                             </div>
                             <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="Windows"><label
-                                    class="custom-control-label" for="Windows">Windows phone</label>
+                                <input type="checkbox" class="custom-control-input" id="Windows"
+                                @click="checkedOS($event.target,'Windows')"><label class="custom-control-label"
+                                    for="Windows">Windows phone</label>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="Blackberryphone"
+                                    @click="checkedOS($event.target,'Blackberry')"><label class="custom-control-label"
+                                    for="Blackberryphone">Blackberry</label>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="Otro"
+                                @click="checkedOS($event.target,'Otro')"><label class="custom-control-label"
+                                    for="Otro">Otro</label>
                             </div>
                         </div>
                     </div>
@@ -165,7 +178,7 @@
                     </nav>
                     <!-- Topbar -->
 
-                    <!-- Container Fluid-->
+                    <!---Cuerpo principal de pagina INICIO-->
                     <div class="container-fluid" id="container-wrapper">
                         <div class="row mb-3">
                             <div class="div-superior">
@@ -190,7 +203,7 @@
 
                             <!-- Anuncios listados -->
                             <div class="col-xl-3 col-md-6 mb-4" v-for="(anuncio) in anuncios"
-                                style="padding-bottom: 0%;">
+                                style="padding-bottom: 0%;" v-show="filtrosAnuncios(anuncio)">
                                 <div class="card h-100" style="cursor: pointer;">
                                     <div class="card-body" style="display: flex;">
                                         <div class="row align-items-center" style="width: 100%;">
@@ -216,48 +229,58 @@
                                         <div class="text-xs font-weight-bold text-uppercase mb-1">Vendedor:
                                             {{anuncio.nombreVendedor}}</div>
                                         <div class="text-xs font-weight-bold text-uppercase mb-1">
-                                            Publicado hace:
+                                            Publicado
                                             {{
                                                 diffDays(anuncio.fecha)
-                                            }} 
-                                            <!-- {{anuncio.fecha.substring(0,2)}}/{{anuncio.fecha.substring(3,5)}}/{{anuncio.fecha.substring(6)}}                                             -->
+                                            }}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <!--Row-->
+                            <!--Anuncio listado FIN-->
+
+                            <!-- Paginador bottom -->
+                            <div class="dataTables_paginate paging_simple_numbers" id="dataTable_paginate"
+                                style="width: 100%;display: flex;justify-content: center;">
+                                <ul class="pagination">
+                                    <li class="paginate_button page-item previous disabled" id="dataTable_previous"><a
+                                            href="#" aria-controls="dataTable" data-dt-idx="0" tabindex="0"
+                                            class="page-link">Anterior</a>
+                                    </li>
+                                    <li class="paginate_button page-item active"><a href="#" aria-controls="dataTable"
+                                            data-dt-idx="1" tabindex="0" class="page-link">1</a></li>
+                                    <li class="paginate_button page-item "><a href="#" aria-controls="dataTable"
+                                            data-dt-idx="2" tabindex="0" class="page-link">2</a></li>
+                                    <li class="paginate_button page-item "><a href="#" aria-controls="dataTable"
+                                            data-dt-idx="3" tabindex="0" class="page-link">3</a></li>
+                                    <li class="paginate_button page-item "><a href="#" aria-controls="dataTable"
+                                            data-dt-idx="4" tabindex="0" class="page-link">4</a></li>
+                                    <li class="paginate_button page-item "><a href="#" aria-controls="dataTable"
+                                            data-dt-idx="5" tabindex="0" class="page-link">5</a></li>
+                                    <li class="paginate_button page-item "><a href="#" aria-controls="dataTable"
+                                            data-dt-idx="6" tabindex="0" class="page-link">6</a></li>
+                                    <li class="paginate_button page-item next" id="dataTable_next"><a href="#"
+                                            aria-controls="dataTable" data-dt-idx="7" tabindex="0"
+                                            class="page-link">Siguiente</a></li>
+                                </ul>
+                            </div>
+                            <!-- Paginador bottom FIN -->
+
+                            <!-- Footer -->
+                            <div class="footer-page">Desarrollado por: <strong>Jaime Navas</strong>.</div>
+                            <!-- Footer FIN -->
+
                         </div>
-                        <!---Container Fluid-->
+                        <!---Cuerpo principal de pagina FIN-->
                     </div>
                 </div>
-                <div class="dataTables_paginate paging_simple_numbers" id="dataTable_paginate"
-                    style="align-self: center;">
-                    <ul class="pagination">
-                        <li class="paginate_button page-item previous disabled" id="dataTable_previous"><a href="#"
-                                aria-controls="dataTable" data-dt-idx="0" tabindex="0" class="page-link">Previous</a>
-                        </li>
-                        <li class="paginate_button page-item active"><a href="#" aria-controls="dataTable"
-                                data-dt-idx="1" tabindex="0" class="page-link">1</a></li>
-                        <li class="paginate_button page-item "><a href="#" aria-controls="dataTable" data-dt-idx="2"
-                                tabindex="0" class="page-link">2</a></li>
-                        <li class="paginate_button page-item "><a href="#" aria-controls="dataTable" data-dt-idx="3"
-                                tabindex="0" class="page-link">3</a></li>
-                        <li class="paginate_button page-item "><a href="#" aria-controls="dataTable" data-dt-idx="4"
-                                tabindex="0" class="page-link">4</a></li>
-                        <li class="paginate_button page-item "><a href="#" aria-controls="dataTable" data-dt-idx="5"
-                                tabindex="0" class="page-link">5</a></li>
-                        <li class="paginate_button page-item "><a href="#" aria-controls="dataTable" data-dt-idx="6"
-                                tabindex="0" class="page-link">6</a></li>
-                        <li class="paginate_button page-item next" id="dataTable_next"><a href="#"
-                                aria-controls="dataTable" data-dt-idx="7" tabindex="0" class="page-link">Next</a></li>
-                    </ul>
-                </div>
+
             </div>
             <!-- Scroll to top -->
             <a class="scroll-to-top rounded" href="#page-top">
                 <i class="fas fa-angle-up"></i>
             </a>
-
+            <!-- ------------------------------------------------------- Inicio de modales -------------------------------------------------------  -->
             <!-- modal center start-->
             <div class="modal fade" id="anuncioDeTel" tabindex="-1" role="dialog"
                 aria-labelledby="exampleModalCenterTitle" aria-modal="true" style="display: none;">

@@ -62,7 +62,8 @@ const vueApp = new Vue({
             "fecha": ""
         },
         pasoModal: 1,
-        anuncios: []
+        anuncios: [],
+        operativoSel: []
     },
 
 
@@ -225,13 +226,81 @@ const vueApp = new Vue({
                     vueApp.fotoFiles = [];
                     vueApp.fotoTmp = [];
                     vueApp.pasoModal = 1;
-                    vueApp.fetchAnuncios();
+                    vueApp.anuncios.push(vueApp.anuncio);
+                    vueApp.anuncio = {
+                        "compania_tel": "",
+                        "Screen_size": 0,
+                        "ram": 0,
+                        "rom": 0,
+                        "estado": "",
+                        "descripcion": "",
+                        "precio": 0,
+                        "sistema": "",
+                        "nombreVendedor": "",
+                        "id_modelo": "",
+                        "titulo": "",
+                        "telVendedor": "",
+                        "fotos": [],
+                        "fecha": ""
+                    };
+                    // vueApp.fetchAnuncios();
                     console.log("El documento se ha escrito y su id es: ", docRef.id);
                 }).catch(function (error) {
                     console.error("Error al tratar de agregar el documento", error);
                 });
             });
         },
+        filtrosAnuncios(obAnuncio){
+            //si es nuevo el dispositivo o no, falta
+            let listaOp = this.operativoSel.length>0;
+            let hayMarca = this.marcas.some(e => e.checked === true);
+            //en caso que todos esten activos
+            if (listaOp && hayMarca) {
+
+                //Obtengo el id de la marca
+                let indexModelo = this.modelos.findIndex(model => model.id===obAnuncio.id_modelo);
+                let idMar = this.modelos[indexModelo].id_marca;
+                //filtrar solo marcas que tengan selected
+                let marcasChecked = this.marcas.filter(marca => marca.checked === true);
+                if(this.operativoSel.includes(obAnuncio.sistema) && marcasChecked.some(marca => marca.id ===idMar)){
+                    return true;
+                }
+                return false;
+                //Funcionando
+            //En caso que solo hayan seleccionado sistemas operativos    
+            } else if (listaOp) {
+                if(this.operativoSel.includes(obAnuncio.sistema)){
+                    return true;
+                }
+                return false;
+                
+            //En caso que solo hayan seleccionado alguna marca        
+            }else if (hayMarca) {
+                //Obtengo el id de la marca
+                let indexModelo = this.modelos.findIndex(model => model.id===obAnuncio.id_modelo);
+                let idMar = this.modelos[indexModelo].id_marca;
+                //filtrar solo marcas que tengan selected
+                let marcasChecked = this.marcas.filter(marca => marca.checked === true);
+                if(marcasChecked.some(marca => marca.id ===idMar)){
+                    return true;
+                }
+                return false;
+                
+            }
+            //por defecto
+            return true;
+        },
+        checkedOS(obj,name){
+            let index = this.operativoSel.indexOf(name);
+            if(!obj.checked){
+                if (index > -1) {
+                    this.operativoSel.splice(index, 1);
+                }
+            }else{
+                console.log("add ",name)
+                this.operativoSel.push(name);
+            }
+        }
     },
 
     computed: {
@@ -259,10 +328,10 @@ function getFecha() {
 }
 
 function diffDays(fecha) {
-    //    var fechaActual = getFecha(); Retorna NaN, super weird
-    var fechaActual = new Date().getTime();
+    var fechaActual = new Date(getFecha()).getTime(); 
+    // var fechaActual = new Date().getTime();
     var firstDate = new Date(fecha).getTime();
     var diff = fechaActual - firstDate;
     let total =Math.round((diff / (1000 * 60 * 60 * 24)));
-    return  total===1?`${total} día`:`${total} días`;
+    return  total===0?`hoy mismo`:(total===1?`hace 1 día`:`hace ${total} días`);
 }
