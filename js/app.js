@@ -4,7 +4,6 @@ var storageRef = firebase.storage().ref();
 const vueApp = new Vue({
     el: '#vue-container',
     data: {
-        hola: "jeje",
         marcaSel: "",
         modeloSel: "",
         // Mock de datos :B
@@ -63,7 +62,33 @@ const vueApp = new Vue({
         },
         pasoModal: 1,
         anuncios: [],
-        operativoSel: []
+        operativoSel: [],
+        textoBusqueda: "",
+        estado: {
+            "Nuevo": false,
+            "Usado": false
+        },
+        anuncioSel: {
+            "compania_tel": "",
+            "Screen_size": 0,
+            "ram": 0,
+            "rom": 0,
+            "estado": "",
+            "descripcion": "",
+            "precio": 0,
+            "sistema": "",
+            "nombreVendedor": "",
+            "id_modelo": "",
+            "titulo": "",
+            "telVendedor": "",
+            "fotos": [],
+            "fecha": ""
+        },
+        showModal: false,
+        carrito: [],
+        pagination: 4,
+        pages:[1],
+        activePage:1
     },
 
 
@@ -200,10 +225,10 @@ const vueApp = new Vue({
             db.collection("anuncio").get().then((docs) => {
                 docs.forEach((docu) => {
                     this.anuncios.push(
-                        // "id": docu.id,
                         docu.data(),
                     );
                 });
+                this.setPages();
             });
         },
 
@@ -250,63 +275,135 @@ const vueApp = new Vue({
                 });
             });
         },
-        filtrosAnuncios(obAnuncio){
-            //si es nuevo el dispositivo o no, falta
-            let listaOp = this.operativoSel.length>0;
-            let hayMarca = this.marcas.some(e => e.checked === true);
-            //en caso que todos esten activos
-            if (listaOp && hayMarca) {
-
-                //Obtengo el id de la marca
-                let indexModelo = this.modelos.findIndex(model => model.id===obAnuncio.id_modelo);
-                let idMar = this.modelos[indexModelo].id_marca;
-                //filtrar solo marcas que tengan selected
-                let marcasChecked = this.marcas.filter(marca => marca.checked === true);
-                if(this.operativoSel.includes(obAnuncio.sistema) && marcasChecked.some(marca => marca.id ===idMar)){
-                    return true;
-                }
-                return false;
-                //Funcionando
-            //En caso que solo hayan seleccionado sistemas operativos    
-            } else if (listaOp) {
-                if(this.operativoSel.includes(obAnuncio.sistema)){
-                    return true;
-                }
-                return false;
-                
-            //En caso que solo hayan seleccionado alguna marca        
-            }else if (hayMarca) {
-                //Obtengo el id de la marca
-                let indexModelo = this.modelos.findIndex(model => model.id===obAnuncio.id_modelo);
-                let idMar = this.modelos[indexModelo].id_marca;
-                //filtrar solo marcas que tengan selected
-                let marcasChecked = this.marcas.filter(marca => marca.checked === true);
-                if(marcasChecked.some(marca => marca.id ===idMar)){
-                    return true;
-                }
-                return false;
-                
-            }
-            //por defecto
-            return true;
+        filtrosAnuncios(obAnuncio,index) {
+            //por precio
+            //tamaño pantalla
+            //fecha
+            return this.filtroMarcasSel(obAnuncio) && this.filtroSO(obAnuncio) && this.filtroBuscar(obAnuncio) && this.filtroEstado(obAnuncio) && this.filtroPaginado(index);
         },
-        checkedOS(obj,name){
+        checkedOS(obj, name) {
             let index = this.operativoSel.indexOf(name);
-            if(!obj.checked){
+            if (!obj.checked) {
                 if (index > -1) {
                     this.operativoSel.splice(index, 1);
                 }
-            }else{
-                console.log("add ",name)
+            } else {
                 this.operativoSel.push(name);
+            }
+        },
+        removeFilters() {
+            this.marcas.forEach(marca => marca.checked = false);
+            this.operativoSel.forEach(os => $(`#${os}`)[0].checked = false);
+            this.textoBusqueda = "";
+            this.estado.Nuevo =false;
+            this.estado.Usado =false;
+        },
+        filtroBuscar(objAnuncio) {
+
+            if (this.textoBusqueda.trim() === "")
+                return true;
+
+            var anuncio = objAnuncio.compania_tel + objAnuncio.descripcion +
+                objAnuncio.precio + objAnuncio.titulo;
+
+            anuncio = anuncio.toUpperCase();
+
+            if (anuncio.indexOf(this.textoBusqueda.toUpperCase()) >= 0)
+                return true;
+            else
+                return false;
+        },
+        filtroMarcasSel(obAnuncio) {
+            if (this.marcas.some(e => e.checked === true)) {
+                //Obtengo el id de la marca
+                let indexModelo = this.modelos.findIndex(model => model.id === obAnuncio.id_modelo);
+                let idMar = this.modelos[indexModelo].id_marca;
+                //filtrar solo marcas que tengan selected
+                let marcasChecked = this.marcas.filter(marca => marca.checked === true);
+                if (marcasChecked.some(marca => marca.id === idMar)) {
+                    return true;
+                }
+                return false;
+            }
+            return true;
+        },
+        filtroSO(obAnuncio) {
+            if (this.operativoSel.length > 0) {
+                if (this.operativoSel.includes(obAnuncio.sistema)) {
+                    return true;
+                }
+                return false;
+            }
+            return true;
+        },
+        filtroEstado(obAnuncio) {
+            if ((this.estado.Nuevo && this.estado.Usado) || (!this.estado.Nuevo && !this.estado.Usado)) {
+                return true
+            } else if (this.estado.Usado) {
+                return obAnuncio.estado === "Usado";
+            } else if (this.estado.Nuevo) {
+                return obAnuncio.estado === "Nuevo";
+            }
+        },
+        filtroPaginado(index){
+            let desde = (this.activePage*parseInt(this.pagination)) - parseInt(this.pagination);
+            let hasta= this.activePage*parseInt(this.pagination);
+            if (index>=desde && index<hasta) {
+                return true;
+            }else{
+                return false;
+            }
+        },
+        openModal() {
+            console.log("dblClicked")
+            $("#anuncioSelected").modal("show");
+        },
+        modeloWithID(idModelo) {
+            return this.modelos.filter(model => model.id === idModelo)[0].nombre_modelo;
+        },
+        marcaWithID(idModelo) {
+            let idMar = this.modelos.filter(model => model.id === idModelo)[0].id_marca;
+            return this.marcas.filter(marca => marca.id === idMar)[0].nombre;
+        },
+        agregarAlCarro(anuncio) {
+            if (!this.carrito.includes(anuncio)) {
+                this.carrito.push(anuncio);
+                this.showModal = false;
+            } else {
+                this.showModal = false;
+            }
+        },
+        total() {
+            let total = 0;
+            this.carrito.forEach(prod => {
+                total += parseInt(prod.precio)
+            });
+            return total;
+        },
+        alert() {
+            this.carrito = [];
+            $(".alert").fadeTo(2000, 500).slideUp(1500, function () {
+                $(".alert").slideUp(500);
+            });
+        },
+        setPages(){
+            this.pages=[1];
+            console.log("total de anuncios", this.anuncios.length)
+            console.log("paginado", parseInt(this.pagination))
+            let totalPag = Math.ceil(this.anuncios.length / parseInt(this.pagination));
+            console.log("# de pag", totalPag)
+            for (let index = 2; index <= totalPag; index++) {
+                console.log("hao push de ", index)
+                this.pages.push(index);
             }
         }
     },
 
-    computed: {
-
+    created: function() {
+        
     },
     mounted: function () {
+        $(".alert").hide();
         console.log("iniciado");
         this.fetchAnuncios()
         this.fetchMarca();
@@ -328,10 +425,21 @@ function getFecha() {
 }
 
 function diffDays(fecha) {
-    var fechaActual = new Date(getFecha()).getTime(); 
+    var fechaActual = new Date(getFecha()).getTime();
     // var fechaActual = new Date().getTime();
     var firstDate = new Date(fecha).getTime();
     var diff = fechaActual - firstDate;
-    let total =Math.round((diff / (1000 * 60 * 60 * 24)));
-    return  total===0?`hoy mismo`:(total===1?`hace 1 día`:`hace ${total} días`);
+    let total = Math.round((diff / (1000 * 60 * 60 * 24)));
+    return total === 0 ? `hoy mismo` : (total === 1 ? `hace 1 día` : `hace ${total} días`);
+}
+
+function clickedCollapse() {
+    if ($("#accordionSidebar").hasClass("toggled")) {
+        $("#accordionSidebar").removeClass("toggled");
+        $("#quitarFiltros").removeAttr('style');
+    } else {
+        $("#accordionSidebar").addClass("toggled");
+        $("#quitarFiltros").css("font-size", "0.7rem");
+
+    }
 }

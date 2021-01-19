@@ -512,8 +512,8 @@ a:focus {
 }
 
 .topbar .dropdown-list .dropdown-header {
-    background-color: #3f51b5;
-    border: 1px solid #3f51b5;
+    background-color: #6aa2e2;
+    border: 1px solid #3481d8;
     padding-top: .75rem;
     padding-bottom: .75rem;
     color: #fff
@@ -2063,8 +2063,8 @@ input:checked+.slider:before {
 
 /* Fin Para signo mas de agregar en marca y modelo */
 
-/* modal backdrop fix */
-.modal:nth-of-type(even).show {
+/* modal backdrop fix odd/even*/
+.modal:nth-of-type(odd).show {
     z-index: 1060 !important;
 }
 
@@ -2375,6 +2375,7 @@ input:checked+.slider:before {
 .hide {
     display: none;
 }
+
 /* fin de horizontal stepper */
 
 .anuncios-img {
@@ -2390,7 +2391,7 @@ input:checked+.slider:before {
     padding-bottom: 0.5rem;
 }
 
-.anuncio-sub{
+.anuncio-sub {
     background-color: #6aa2e2;
     color: white;
     border-radius: 0 0 .375rem .375rem;
@@ -2413,20 +2414,55 @@ input:checked+.slider:before {
     padding: 1rem;
     background-color: #efefef;
     text-align: center;
-  }
+}
 
-  /* anuncio mas informacion, hole screen */
+/* anuncio mas informacion, hole screen */
 
-  .modal-dialog-full {
+.modal-mask {
+    position: fixed;
+    z-index: 9998;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
+    background-color: rgba(0, 0, 0, .5);
+    display: table;
+    transition: opacity .3s ease;
+}
+
+.modal-wrapper {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+/* -----Full screen------ */
+.modal-fullscreen .modal-dialog {
+    width: 100%;
+    max-width: none;
+    height: 100%;
     margin: 0;
-    padding: 0;
-  }
-  
-  .modal-content-full {
-    height: auto;
-    min-height: 100%;
+}
+
+.modal-fullscreen .modal-content {
+    height: 100%;
+    border: 0;
     border-radius: 0;
-  }
-    /* FIN anuncio mas informacion, hole screen */
+}
+
+.modal-fullscreen .modal-body {
+    overflow-y: auto;
+}
+
+/* FIN anuncio mas informacion, hole screen */
+
+.detalleAnuncio {
+    width: auto!important;
+    height: 25vh;
+    object-fit: unset;
+}
+.detAnuncioParent{
+    width: 100%;
+    justify-content: center;
+    padding-bottom: 0.5rem;
+    padding: 0;
+}
